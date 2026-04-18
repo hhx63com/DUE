@@ -1,0 +1,8 @@
+[LRU]
+Library/
+Temp/
+Logs/
+UserSettings/
+*.log
+.DS_Store
+Thumbs.db
