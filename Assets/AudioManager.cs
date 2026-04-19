@@ -14,10 +14,17 @@ public class AudioManager : MonoBehaviour
     }
     public void PlayHitSound()
     {
-        audioSource.PlayOneShot(hitSound);
+        if (audioSource != null && hitSound != null)
+        {
+            audioSource.PlayOneShot(hitSound);
+        }
     }
     public void PlayBGSound(){
-        audioSource.PlayOneShot(bgSound);
+
+        if (audioSource != null && bgSound != null)
+        {
+            audioSource.PlayOneShot(bgSound);
+        }
     }
 
     // Update is called once per frame
