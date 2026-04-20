@@ -6,7 +6,7 @@ using TMPro;
 public class ChaMove : MonoBehaviour
 {
     public float speed = 3;
-    private int count = 0;
+    private int count;
 
     public AudioManager audioManager;
     public TextMeshProUGUI countText;

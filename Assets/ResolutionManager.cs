@@ -1,101 +1,55 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class ResolutionManager : MonoBehaviour
 {
-    [Header("Resolution Settings")]
-    public bool useFixedResolution = false;
-    public int fixedWidth = 1920;
-    public int fixedHeight = 1080;
-    public bool fullScreen = false;
-    
-    [Header("Responsive Settings")]
-    public bool useAspectRatio = true;
-    public float targetAspectRatio = 16f / 9f;
-    
-    [Header("UI Settings")]
-    public CanvasScaler canvasScaler;
-    public bool autoAdjustCanvas = true;
-    
-    void Start()
+    [Header("分辨率设置")]
+    public int targetWidth = 1920;        // 目标宽度
+    public int targetHeight = 1080;       // 目标高度
+    public bool fullScreen = true;        // 是否全屏
+
+    [Header("Canvas 设置")]
+    public Canvas targetCanvas;            // 指定要设置的 Canvas（如果不指定，会尝试找场景中的第一个 Canvas）
+    public CanvasScaler.ScaleMode scaleMode = CanvasScaler.ScaleMode.ScaleWithScreenSize;
+
+    void Awake()
     {
-        if (useFixedResolution)
-        {
-            // 使用固定分辨率
-            Screen.SetResolution(fixedWidth, fixedHeight, fullScreen);
-        }
-        else if (useAspectRatio)
-        {
-            // 保持目标宽高比
-            AdjustToTargetAspectRatio();
-        }
-        
-        // 自动调整Canvas
-        if (autoAdjustCanvas && canvasScaler != null)
-        {
-            SetupCanvasScaler();
-        }
+        // 1. 设置游戏窗口分辨率
+        Screen.SetResolution(targetWidth, targetHeight, fullScreen);
+        Debug.Log($"[ResolutionManager] 分辨率设置为 {targetWidth}x{targetHeight}, 全屏: {fullScreen}");
+
+        // 2. 自动配置 CanvasScaler（如果存在 Canvas）
+        ConfigureCanvasScaler();
     }
-    
-    void AdjustToTargetAspectRatio()
+
+    void ConfigureCanvasScaler()
     {
-        float currentAspectRatio = (float)Screen.width / Screen.height;
-        
-        if (Mathf.Abs(currentAspectRatio - targetAspectRatio) > 0.01f)
+        // 如果没有手动指定 Canvas，则尝试查找场景中第一个激活的 Canvas
+        if (targetCanvas == null)
+            targetCanvas = FindObjectOfType<Canvas>();
+
+        if (targetCanvas == null)
         {
-            // 计算合适的分辨率
-            if (currentAspectRatio > targetAspectRatio)
-            {
-                // 屏幕太宽，保持高度不变
-                int newWidth = Mathf.RoundToInt(Screen.height * targetAspectRatio);
-                Screen.SetResolution(newWidth, Screen.height, fullScreen);
-            }
-            else
-            {
-                // 屏幕太高，保持宽度不变
-                int newHeight = Mathf.RoundToInt(Screen.width / targetAspectRatio);
-                Screen.SetResolution(Screen.width, newHeight, fullScreen);
-            }
+            Debug.LogWarning("[ResolutionManager] 场景中没有找到 Canvas 组件，请手动添加 CanvasScaler。");
+            return;
         }
-    }
-    
-    void SetupCanvasScaler()
-    {
-        if (canvasScaler != null)
+
+        // 获取或添加 CanvasScaler 组件
+        CanvasScaler scaler = targetCanvas.GetComponent<CanvasScaler>();
+        if (scaler == null)
+            scaler = targetCanvas.gameObject.AddComponent<CanvasScaler>();
+
+        // 设置缩放模式
+        scaler.uiScaleMode = scaleMode;
+
+        // 如果是 ScaleWithScreenSize 模式，设置参考分辨率（与目标分辨率一致）
+        if (scaleMode == CanvasScaler.ScaleMode.ScaleWithScreenSize)
         {
-            // 设置CanvasScaler为按屏幕尺寸缩放
-            canvasScaler.uiScaleMode = CanvasScaler.ScaleMode.ScaleWithScreenSize;
-            
-            // 设置参考分辨率
-            canvasScaler.referenceResolution = new Vector2(fixedWidth, fixedHeight);
-            
-            // 设置屏幕匹配模式
-            canvasScaler.screenMatchMode = CanvasScaler.ScreenMatchMode.MatchWidthOrHeight;
-            
-            // 设置匹配比例（0 = 宽度优先，1 = 高度优先）
-            canvasScaler.matchWidthOrHeight = 0.5f; // 平均匹配
+            scaler.referenceResolution = new Vector2(targetWidth, targetHeight);
+            scaler.screenMatchMode = CanvasScaler.ScreenMatchMode.MatchWidthOrHeight;
+            scaler.matchWidthOrHeight = 0.5f; // 平衡宽高影响
         }
-    }
-    
-    // 手动调整分辨率的方法
-    public void SetResolution(int width, int height, bool isFullScreen)
-    {
-        Screen.SetResolution(width, height, isFullScreen);
-    }
-    
-    // 切换全屏模式
-    public void ToggleFullScreen()
-    {
-        Screen.fullScreen = !Screen.fullScreen;
-    }
-    
-    // 适应当前屏幕
-    public void AdaptToCurrentScreen()
-    {
-        if (useAspectRatio)
-        {
-            AdjustToTargetAspectRatio();
-        }
+
+        Debug.Log($"[ResolutionManager] CanvasScaler 已配置: 模式={scaleMode}, 参考分辨率={scaler.referenceResolution}");
     }
 }
