@@ -10,7 +10,7 @@
 
 ### 方法 1：使用 Git 命令行
 
-1. **打开终端**（Windows 上使用 PowerShell 或命令提示符，macOS/Linux 上使用终端）
+1. **打开终端**（Windows 上使用 PowerShell 或命令提示符）
 
 2. **导航到你想要存储项目的目录**：
    ```bash
@@ -138,4 +138,3 @@ DUE/
 ---
 
 **项目地址**：[https://github.com/hhx63com/DUE](https://github.com/hhx63com/DUE)
-**分支**：Main-game-library
